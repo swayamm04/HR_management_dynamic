@@ -32,8 +32,11 @@ export const migrateEmployeeIds = async (req?: Request, res?: Response) => {
         const employees = await Employee.find().sort({ createdAt: 1 });
         
         for (let i = 0; i < employees.length; i++) {
+            const employee = employees[i];
+            if (!employee) continue;
+
             const newId = `EMP-${(i + 1).toString().padStart(4, '0')}`;
-            await Employee.findByIdAndUpdate(employees[i]._id, { employeeId: newId });
+            await Employee.findByIdAndUpdate(employee._id, { employeeId: newId });
         }
 
         if (res) {

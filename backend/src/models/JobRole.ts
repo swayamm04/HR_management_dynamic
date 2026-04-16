@@ -1,6 +1,8 @@
-import mongoose, { Schema, Document } from "mongoose";
+import mongoose, { Schema, type Types } from "mongoose";
+import type { Document } from "mongoose";
 
 export interface IJobRole extends Document {
+  _id: Types.ObjectId;
   title: string;
   description?: string;
   createdAt: Date;

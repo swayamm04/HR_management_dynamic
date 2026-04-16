@@ -1,7 +1,8 @@
-import mongoose, { Schema } from "mongoose";
+import mongoose, { Schema, type Types } from "mongoose";
 import type { Document } from "mongoose";
 
 export interface IEmployee extends Document {
+  _id: Types.ObjectId;
   employeeId: string;
   name: string;
   email: string;
