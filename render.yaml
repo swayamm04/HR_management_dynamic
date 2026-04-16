@@ -1,0 +1,39 @@
+services:
+  # Backend Web Service
+  - type: web
+    name: hr-management-backend
+    runtime: node
+    plan: starter
+    rootDir: backend
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_VERSION
+        value: 20.0.0
+      - key: MONGODB_URI
+        sync: false # Set in Render Dashboard
+      - key: JWT_SECRET
+        sync: false # Set in Render Dashboard
+      - key: CORS_ORIGIN
+        fromService:
+          type: static
+          name: hr-management-frontend
+          property: url
+      - key: PORT
+        value: 5000
+
+  # Frontend Static Site
+  - type: static
+    name: hr-management-frontend
+    plan: free
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    publishDir: out
+    envVars:
+      - key: NODE_VERSION
+        value: 20.0.0
+      - key: NEXT_PUBLIC_API_URL
+        fromService:
+          type: web
+          name: hr-management-backend
+          property: url
