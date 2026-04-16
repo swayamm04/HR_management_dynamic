@@ -23,9 +23,6 @@ const navItems = [
   { label: "Attendance", icon: CalendarCheck, path: "/attendance" },
   { label: "Billing/Invoices", icon: FileText, path: "/billing" },
   { label: "Reports", icon: BarChart3, path: "/reports" },
-];
-
-const bottomItems = [
   { label: "Activity Logs", icon: Activity, path: "/activity-logs" },
   { label: "Settings", icon: Settings, path: "/settings" },
 ];
@@ -69,39 +66,9 @@ export default function AppSidebar() {
         })}
       </nav>
 
-      {/* Bottom nav */}
-      <div className="space-y-0.5 px-3 pb-2">
-        {bottomItems.map((item) => {
-          const active = pathname === item.path;
-          return (
-            <Link
-              key={item.path}
-              href={item.path}
-              className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
-                active
-                  ? "bg-primary/10 text-primary"
-                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
-              }`}
-            >
-              <item.icon className="h-4.5 w-4.5 shrink-0" />
-              {item.label}
-            </Link>
-          );
-        })}
-      </div>
 
-      {/* Support plan */}
-      <div className="mx-3 mb-4 rounded-xl bg-primary p-4">
-        <p className="text-[10px] font-semibold uppercase tracking-wider text-primary-foreground/70">
-          Support Plan
-        </p>
-        <p className="mt-1 text-sm font-bold text-primary-foreground">
-          Enterprise Gold
-        </p>
-        <button className="mt-3 w-full rounded-lg bg-primary-foreground/20 py-2 text-xs font-semibold text-primary-foreground hover:bg-primary-foreground/30 transition-colors">
-          Get Help
-        </button>
-      </div>
+
+
 
       {/* Chat FAB */}
       <button className="fixed bottom-6 right-6 z-50 flex h-12 w-12 items-center justify-center rounded-full bg-primary shadow-lg hover:shadow-xl transition-shadow">
