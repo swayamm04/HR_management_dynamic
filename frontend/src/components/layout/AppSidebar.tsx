@@ -12,7 +12,6 @@ import {
   BarChart3,
   Activity,
   Settings,
-  MessageCircle,
 } from "lucide-react";
 
 const navItems = [
@@ -70,10 +69,6 @@ export default function AppSidebar() {
 
 
 
-      {/* Chat FAB */}
-      <button className="fixed bottom-6 right-6 z-50 flex h-12 w-12 items-center justify-center rounded-full bg-primary shadow-lg hover:shadow-xl transition-shadow">
-        <MessageCircle className="h-5 w-5 text-primary-foreground" />
-      </button>
     </aside>
   );
 }

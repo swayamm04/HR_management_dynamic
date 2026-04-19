@@ -6,6 +6,7 @@ import connectDB from './config/db.js';
 import authRoutes from './routes/authRoutes.js';
 import employeeRoutes from './routes/employeeRoutes.js';
 import jobRoleRoutes from './routes/jobRoleRoutes.js';
+import clientRoutes from './routes/clientRoutes.js';
 
 // Load env vars
 dotenv.config();
@@ -28,6 +29,7 @@ app.use(cors({
 app.use('/api/auth', authRoutes);
 app.use('/api/employees', employeeRoutes);
 app.use('/api/job-roles', jobRoleRoutes);
+app.use('/api/clients', clientRoutes);
 
 // Basic route
 app.get('/', (req: Request, res: Response) => {
