@@ -33,34 +33,8 @@ export const login = async (req: Request, res: Response) => {
             });
         }
 
-        // 2. Check for Employee
-        const employee = await Employee.findOne({ email });
-        if (!employee || !employee.password) {
-            return res.status(401).json({ message: 'Invalid credentials' });
-        }
-
-        // Plain text comparison
-        const isMatch = employee.password === password;
-        if (!isMatch) {
-            return res.status(401).json({ message: 'Invalid credentials' });
-        }
-
-        // Generate token for employee
-        const token = jwt.sign(
-            { email: employee.email, role: employee.role, id: employee._id },
-            process.env.JWT_SECRET as string,
-            { expiresIn: '1d' }
-        );
-
-        return res.status(200).json({
-            message: 'Login successful',
-            token,
-            user: {
-                email: employee.email,
-                name: employee.name,
-                role: employee.role
-            }
-        });
+        // 2. Employee login removed (Employee management minimized)
+        return res.status(401).json({ message: 'incorrect mail or password' });
 
     } catch (error) {
         console.error('Login error:', error);

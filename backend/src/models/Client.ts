@@ -5,6 +5,7 @@ export interface IClient extends Document {
   status: 'ACTIVE CONTRACT' | 'REVIEW PENDING' | 'INACTIVE';
   contactPerson: string;
   email: string;
+  address: string;
   activeEmployees: number;
   totalBilled: number;
   createdAt: Date;
@@ -34,6 +35,11 @@ const clientSchema = new Schema(
       required: false,
       trim: true,
       lowercase: true,
+    },
+    address: {
+      type: String,
+      required: false,
+      trim: true,
     },
     activeEmployees: {
       type: Number,

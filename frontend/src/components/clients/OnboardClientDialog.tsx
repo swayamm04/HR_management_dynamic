@@ -12,17 +12,45 @@ interface OnboardClientDialogProps {
   onOpenChange: (open: boolean) => void;
   onSubmit: (data: any) => Promise<void>;
   isLoading: boolean;
+  initialData?: any;
 }
 
-export function OnboardClientDialog({ open, onOpenChange, onSubmit, isLoading }: OnboardClientDialogProps) {
+export function OnboardClientDialog({ open, onOpenChange, onSubmit, isLoading, initialData }: OnboardClientDialogProps) {
   const [formData, setFormData] = useState({
-    name: "",
-    contactPerson: "",
-    email: "",
-    status: "ACTIVE CONTRACT",
-    activeEmployees: 0,
-    totalBilled: 0,
+    name: initialData?.name || "",
+    contactPerson: initialData?.contactPerson || "",
+    email: initialData?.email || "",
+    address: initialData?.address || "",
+    status: initialData?.status || "ACTIVE CONTRACT",
+    activeEmployees: initialData?.activeEmployees || 0,
+    totalBilled: initialData?.totalBilled || 0,
   });
+
+  // Since we use useState with initial props, we need to sync when initialData changes
+  React.useEffect(() => {
+    if (initialData) {
+      setFormData({
+        name: initialData.name || "",
+        contactPerson: initialData.contactPerson || "",
+        email: initialData.email || "",
+        address: initialData.address || "",
+        status: initialData.status || "ACTIVE CONTRACT",
+        activeEmployees: initialData.activeEmployees || 0,
+        totalBilled: initialData.totalBilled || 0,
+      });
+    } else {
+      // Reset for new client
+      setFormData({
+        name: "",
+        contactPerson: "",
+        email: "",
+        address: "",
+        status: "ACTIVE CONTRACT",
+        activeEmployees: 0,
+        totalBilled: 0,
+      });
+    }
+  }, [initialData, open]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,6 +65,7 @@ export function OnboardClientDialog({ open, onOpenChange, onSubmit, isLoading }:
         name: "",
         contactPerson: "",
         email: "",
+        address: "",
         status: "ACTIVE CONTRACT",
         activeEmployees: 0,
         totalBilled: 0,
@@ -51,9 +80,11 @@ export function OnboardClientDialog({ open, onOpenChange, onSubmit, isLoading }:
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Onboard New Client</DialogTitle>
+          <DialogTitle>{initialData ? "Edit Client Details" : "Onboard New Client"}</DialogTitle>
           <DialogDescription>
-            Enter the details for the new organization to add them to your roster.
+            {initialData 
+              ? "Update the organization's profile information and billing address." 
+              : "Enter the details for the new organization to add them to your roster."}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4 py-4">
@@ -88,6 +119,16 @@ export function OnboardClientDialog({ open, onOpenChange, onSubmit, isLoading }:
                 placeholder="contact@acme.com"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              />
+            </div>
+
+            <div className="col-span-2 space-y-2">
+              <Label htmlFor="address">Organization Address</Label>
+              <Input
+                id="address"
+                placeholder="e.g. 1st Floor, Main St, Bangalore"
+                value={formData.address}
+                onChange={(e) => setFormData({ ...formData, address: e.target.value })}
               />
             </div>
 
@@ -141,7 +182,7 @@ export function OnboardClientDialog({ open, onOpenChange, onSubmit, isLoading }:
             </Button>
             <Button type="submit" disabled={isLoading}>
               {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-              Save Client
+              {initialData ? "Save Changes" : "Save Client"}
             </Button>
           </DialogFooter>
         </form>

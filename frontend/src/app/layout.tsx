@@ -7,7 +7,7 @@ import AuthGuard from "@/components/auth/AuthGuard";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "HR & Billing Management",
+  title: "AKHILA ENTERPRISES - Billing & HR",
   description: "Enterprise Manpower Management System",
 };
 

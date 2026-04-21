@@ -16,11 +16,10 @@ import {
 
 const navItems = [
   { label: "Dashboard", icon: LayoutDashboard, path: "/" },
-  { label: "Employee Management", icon: Users, path: "/employees" },
   { label: "Client Management", icon: Building2, path: "/clients" },
   { label: "Job Roles", icon: Briefcase, path: "/job-roles" },
-  { label: "Attendance", icon: CalendarCheck, path: "/attendance" },
-  { label: "Billing/Invoices", icon: FileText, path: "/billing" },
+  { label: "Create Bills/Invoice", icon: FileText, path: "/billing" },
+  { label: "Invoices List", icon: CalendarCheck, path: "/invoices" },
   { label: "Reports", icon: BarChart3, path: "/reports" },
   { label: "Activity Logs", icon: Activity, path: "/activity-logs" },
   { label: "Settings", icon: Settings, path: "/settings" },
@@ -30,16 +29,16 @@ export default function AppSidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="fixed left-0 top-0 z-40 flex h-screen w-60 flex-col bg-card border-r border-border">
+    <aside className="fixed left-0 top-0 z-40 flex h-screen w-64 flex-col bg-card border-r border-border">
       {/* Logo */}
-      <div className="flex items-center gap-3 px-5 py-5">
-        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
+      <div className="flex items-center gap-2.5 px-4 py-5">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary">
           <Briefcase className="h-5 w-5 text-primary-foreground" />
         </div>
-        <div>
-          <h1 className="text-sm font-bold text-foreground">Manpower Pro</h1>
-          <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
-            HR & Billing
+        <div className="min-w-0">
+          <h1 className="text-[13px] font-bold text-foreground whitespace-nowrap leading-none mb-0.5">AKHILA ENTERPRISES</h1>
+          <p className="text-[9px] font-medium uppercase tracking-wider text-muted-foreground italic whitespace-nowrap">
+            Manpower Agency
           </p>
         </div>
       </div>

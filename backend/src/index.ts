@@ -7,12 +7,24 @@ import authRoutes from './routes/authRoutes.js';
 import employeeRoutes from './routes/employeeRoutes.js';
 import jobRoleRoutes from './routes/jobRoleRoutes.js';
 import clientRoutes from './routes/clientRoutes.js';
+import invoiceRoutes from './routes/invoiceRoutes.js';
+import companyRoutes from './routes/companyRoutes.js';
 
 // Load env vars
 dotenv.config();
 
 // Connect to database
-connectDB();
+connectDB().then(async () => {
+    try {
+        const Employee = (await import('./models/Employee.js')).default;
+        const result = await Employee.deleteMany({});
+        if (result.deletedCount > 0) {
+            console.log(`Cleaned up ${result.deletedCount} legacy employee records.`);
+        }
+    } catch (err) {
+        console.error('Data cleanup error:', err);
+    }
+});
 
 const app = express();
 
@@ -30,6 +42,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/employees', employeeRoutes);
 app.use('/api/job-roles', jobRoleRoutes);
 app.use('/api/clients', clientRoutes);
+app.use('/api/invoices', invoiceRoutes);
+app.use('/api/company', companyRoutes);
 
 // Basic route
 app.get('/', (req: Request, res: Response) => {

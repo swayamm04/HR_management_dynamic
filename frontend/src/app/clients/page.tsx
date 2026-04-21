@@ -1,21 +1,21 @@
 "use client";
 
 import React, { useState } from "react";
-import { Building2, Users, IndianRupee, MoreVertical, Mail, Loader2 } from "lucide-react";
+import { Building2, Users, IndianRupee, MoreVertical, Mail, Loader2, Pencil, Trash2 } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { OnboardClientDialog } from "@/components/clients/OnboardClientDialog";
 import { ClientDetailsDialog } from "@/components/clients/ClientDetailsDialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
+import ConfirmDialog from "@/components/ui/ConfirmDialog";
 
-interface Client {
-  _id: string;
-  name: string;
-  status: string;
-  contactPerson: string;
-  email: string;
-  activeEmployees: number;
-  totalBilled: number;
-}
+import { type Client } from "@/types/client";
 
 async function fetchClients(): Promise<Client[]> {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
@@ -27,6 +27,9 @@ async function fetchClients(): Promise<Client[]> {
 export default function ClientManagement() {
   const [isOnboardOpen, setIsOnboardOpen] = useState(false);
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
+  const [editingClient, setEditingClient] = useState<Client | null>(null);
+  const [clientToDelete, setClientToDelete] = useState<Client | null>(null);
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const queryClient = useQueryClient();
 
   const { data: clients, isLoading } = useQuery({
@@ -51,23 +54,70 @@ export default function ClientManagement() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["clients"] });
       toast.success("Client onboarded successfully");
+      setIsOnboardOpen(false);
     },
     onError: (err: any) => {
       toast.error("Error", { description: err.message });
     },
   });
 
+  const updateMutation = useMutation({
+    mutationFn: async (clientData: any) => {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+      const response = await fetch(`${apiUrl}/api/clients/${editingClient?._id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(clientData),
+      });
+      if (!response.ok) {
+        const err = await response.json();
+        throw new Error(err.message || "Failed to update client");
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["clients"] });
+      toast.success("Client updated successfully");
+      setEditingClient(null);
+    },
+    onError: (err: any) => {
+      toast.error("Error", { description: err.message });
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+      const response = await fetch(`${apiUrl}/api/clients/${id}`, {
+        method: "DELETE",
+      });
+      if (!response.ok) throw new Error("Failed to delete client");
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["clients"] });
+      toast.success("Client deleted successfully");
+      setIsDeleteConfirmOpen(false);
+      setClientToDelete(null);
+    },
+    onError: (err: any) => {
+      toast.error("Error", { description: err.message });
+      setIsDeleteConfirmOpen(false);
+    },
+  });
+
   const handleOnboardSubmit = async (data: any) => {
-    await createMutation.mutateAsync(data);
+    if (editingClient) {
+      await updateMutation.mutateAsync(data);
+    } else {
+      await createMutation.mutateAsync(data);
+    }
   };
 
   const calculateTotalBilled = () => {
     return clients?.reduce((sum, client) => sum + (client.totalBilled || 0), 0) || 0;
   };
 
-  const calculateTotalEmployees = () => {
-    return clients?.reduce((sum, client) => sum + (client.activeEmployees || 0), 0) || 0;
-  };
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-IN', {
@@ -97,7 +147,7 @@ export default function ClientManagement() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 gap-4">
         <div className="rounded-xl border border-border bg-card p-5">
           <div className="flex items-center gap-3 mb-2">
             <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center"><Users className="h-5 w-5 text-primary" /></div>
@@ -113,14 +163,6 @@ export default function ClientManagement() {
           <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Total Billed</p>
           <p className="text-2xl font-bold text-foreground">{isLoading ? "-" : totalBilledFormatted}</p>
           <p className="mt-1 text-xs text-muted-foreground">Overall</p>
-        </div>
-        <div className="rounded-xl border border-border bg-card p-5">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center"><Users className="h-5 w-5 text-primary" /></div>
-          </div>
-          <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Active Manpower</p>
-          <p className="text-2xl font-bold text-foreground">{isLoading ? "-" : calculateTotalEmployees()} Employees</p>
-          <p className="mt-1 text-xs text-muted-foreground">Currently deployed across all client sites.</p>
         </div>
       </div>
 
@@ -150,14 +192,36 @@ export default function ClientManagement() {
                       <p className={`text-[10px] font-semibold uppercase tracking-wider ${statusColor}`}>● {client.status}</p>
                     </div>
                   </div>
-                  <button className="text-muted-foreground"><MoreVertical className="h-4 w-4" /></button>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <button 
+                          className="text-muted-foreground hover:text-foreground p-1 rounded-md hover:bg-muted transition-colors"
+                        >
+                          <MoreVertical className="h-4 w-4" />
+                        </button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-32">
+                        <DropdownMenuItem onClick={() => setEditingClient(client)} className="flex items-center gap-2 cursor-pointer">
+                          <Pencil className="h-3.5 w-3.5" />
+                          <span>Edit</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem 
+                          onClick={() => {
+                            setClientToDelete(client);
+                            setIsDeleteConfirmOpen(true);
+                          }} 
+                          className="flex items-center gap-2 cursor-pointer text-destructive focus:text-destructive"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                          <span>Delete</span>
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                 </div>
                 <div className="space-y-2.5 text-sm">
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <Users className="h-4 w-4 shrink-0" /> <span>Contact Person</span> <span className="ml-auto font-medium text-foreground truncate pl-2">{client.contactPerson}</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <Users className="h-4 w-4 shrink-0" /> <span>Active Employees</span> <span className="ml-auto font-bold text-foreground">{client.activeEmployees}</span>
                   </div>
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <IndianRupee className="h-4 w-4 shrink-0" /> <span>Total Billed</span> <span className="ml-auto font-bold text-primary">{formatCurrency(client.totalBilled)}</span>
@@ -190,16 +254,38 @@ export default function ClientManagement() {
       )}
 
       <OnboardClientDialog 
-        open={isOnboardOpen} 
-        onOpenChange={setIsOnboardOpen} 
+        open={isOnboardOpen || !!editingClient} 
+        onOpenChange={(open) => {
+          if (!open) {
+            setIsOnboardOpen(false);
+            setEditingClient(null);
+          } else {
+            setIsOnboardOpen(true);
+          }
+        }} 
         onSubmit={handleOnboardSubmit}
-        isLoading={createMutation.isPending}
+        isLoading={createMutation.isPending || updateMutation.isPending}
+        initialData={editingClient}
       />
       <ClientDetailsDialog
         client={selectedClient}
         open={!!selectedClient}
         onOpenChange={(open) => !open && setSelectedClient(null)}
       />
+
+      {clientToDelete && (
+        <ConfirmDialog
+          open={isDeleteConfirmOpen}
+          onOpenChange={setIsDeleteConfirmOpen}
+          title="Delete Client"
+          description={`Are you sure you want to delete "${clientToDelete.name}"? This action cannot be undone and will remove all associated data.`}
+          confirmText="Delete Client"
+          cancelText="Cancel"
+          variant="destructive"
+          onConfirm={() => deleteMutation.mutate(clientToDelete._id)}
+          isLoading={deleteMutation.isPending}
+        />
+      )}
     </div>
   );
 }

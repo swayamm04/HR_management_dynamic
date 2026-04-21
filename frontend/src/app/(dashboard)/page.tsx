@@ -1,6 +1,6 @@
 "use client";
 
-import { Users, Building2, IndianRupee, AlertTriangle, TrendingUp, FileText, UserPlus, AlertCircle, PenLine } from "lucide-react";
+import { Building2, IndianRupee, AlertTriangle, TrendingUp, FileText, AlertCircle, PenLine } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
 const chartData = [
@@ -14,7 +14,6 @@ const chartData = [
 
 const activityLogs = [
   { icon: FileText, color: "bg-primary/10 text-primary", title: "New Invoice Generated", desc: "Client: TechCorp Solutions", time: "2 mins ago" },
-  { icon: UserPlus, color: "bg-success/10 text-success", title: "15 New Employees Onboarded", desc: "Role: Logistic Staff", time: "1 hour ago" },
   { icon: AlertCircle, color: "bg-destructive/10 text-destructive", title: "Payment Overdue", desc: "Client: Global Logistics Ltd.", time: "3 hours ago" },
   { icon: PenLine, color: "bg-muted text-muted-foreground", title: "Settings Updated", desc: "By Admin: Sarah Chen", time: "Yesterday" },
 ];
@@ -26,11 +25,6 @@ const topClients = [
   { name: "Harbor Maritime", revenue: 21000, pct: 46 },
 ];
 
-const employees = [
-  { name: "Alex Rivera", client: "TechCorp Solutions", role: "Project Lead", status: "On Site", statusColor: "bg-success/10 text-success" },
-  { name: "Maya Sterling", client: "Innovate Retail", role: "QA Engineer", status: "Remote", statusColor: "bg-primary/10 text-primary" },
-  { name: "Jordan Hayes", client: "Eco-Logistics", role: "Senior Developer", status: "On Leave", statusColor: "bg-warning/10 text-warning" },
-];
 
 export default function Dashboard() {
   return (
@@ -52,9 +46,8 @@ export default function Dashboard() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-3 gap-4">
         {[
-          { icon: Users, label: "TOTAL EMPLOYEES", value: "1,284", change: "+4%", bg: "bg-card" },
           { icon: Building2, label: "TOTAL CLIENTS", value: "86", change: "Steady", bg: "bg-card" },
           { icon: IndianRupee, label: "MONTHLY REVENUE", value: "₹150,000", change: "+12.5%", bg: "bg-primary text-primary-foreground", highlight: true },
           { icon: AlertTriangle, label: "PENDING BILLS", value: "12", change: "Critical", bg: "bg-card", critical: true },
@@ -132,7 +125,7 @@ export default function Dashboard() {
       </div>
 
       {/* Top Clients + Employee Snapshot */}
-      <div className="grid grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 gap-6">
         <div className="rounded-xl border border-border bg-card p-6">
           <h2 className="text-lg font-bold text-foreground mb-4">Top Clients by Revenue</h2>
           <div className="space-y-4">
@@ -148,43 +141,6 @@ export default function Dashboard() {
               </div>
             ))}
           </div>
-        </div>
-
-        <div className="rounded-xl border border-border bg-card p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-bold text-foreground">Employee Snapshot</h2>
-            <div className="flex rounded-lg border border-border overflow-hidden">
-              <button className="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider bg-card text-primary border-b-2 border-primary">Active Projects</button>
-              <button className="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Archived</button>
-            </div>
-          </div>
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-border">
-                <th className="pb-2 text-left text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Employee Name</th>
-                <th className="pb-2 text-left text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Current Client</th>
-                <th className="pb-2 text-left text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Job Role</th>
-                <th className="pb-2 text-left text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {employees.map((emp) => (
-                <tr key={emp.name} className="border-b border-border last:border-0">
-                  <td className="py-3 font-medium text-foreground">{emp.name}</td>
-                  <td className="py-3 text-muted-foreground">{emp.client}</td>
-                  <td className="py-3 text-muted-foreground">{emp.role}</td>
-                  <td className="py-3">
-                    <span className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold ${emp.statusColor}`}>
-                      {emp.status}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          <button className="mt-3 text-xs font-semibold text-muted-foreground hover:text-foreground">
-            Show All 1,284 Employees
-          </button>
         </div>
       </div>
     </div>
