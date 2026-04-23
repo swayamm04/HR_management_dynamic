@@ -47,6 +47,7 @@ interface InvoicePreviewProps {
   sgstRate: number;
   roundOff?: number;
   date?: string;
+  isGST?: boolean;
 }
 
 export const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>((props, ref) => {
@@ -69,7 +70,8 @@ export const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>((p
     serviceRate,
     cgstRate,
     sgstRate,
-    date 
+    date,
+    isGST = true
   } = props;
 
   return (
@@ -151,44 +153,48 @@ export const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>((p
           })}
           <tr className="border-t-2 border-black font-bold h-7 bg-slate-100/50">
             <td className="border-r-2 border-black p-1 text-right pr-4" colSpan={6}>Total</td>
-            <td className="border-r-2 border-black p-1 text-right pr-2">{subTotal.toLocaleString()}</td>
+            <td className="border-r-2 border-black p-1 text-right pr-2">{Math.floor(subTotal).toLocaleString()}</td>
             <td className="p-1 text-center">{(Math.round((subTotal % 1) * 100)).toString().padStart(2, '0')}</td>
           </tr>
           <tr className="h-7 text-[11px]">
             <td className="border-r-2 border-black p-1 pl-4" colSpan={6}>PF . {pfRate}%</td>
-            <td className="border-r-2 border-black p-1 text-right pr-2">{pf.toLocaleString()}</td>
+            <td className="border-r-2 border-black p-1 text-right pr-2">{Math.floor(pf).toLocaleString()}</td>
             <td className="p-1 text-center">{(Math.round((pf % 1) * 100)).toString().padStart(2, '0')}</td>
           </tr>
           <tr className="h-7 text-[11px] border-b-2 border-black">
             <td className="border-r-2 border-black p-1 pl-4" colSpan={6}>ESI . {esiRate}%</td>
-            <td className="border-r-2 border-black p-1 text-right pr-2">{esi.toLocaleString()}</td>
+            <td className="border-r-2 border-black p-1 text-right pr-2">{Math.floor(esi).toLocaleString()}</td>
             <td className="p-1 text-center">{(Math.round((esi % 1) * 100)).toString().padStart(2, '0')}</td>
           </tr>
           <tr className="font-bold h-7 bg-slate-100/50 border-b-2 border-black text-[11px]">
             <td className="border-r-2 border-black p-1 text-right pr-4 uppercase" colSpan={6}>Total (Basic + PF + ESI)</td>
-            <td className="border-r-2 border-black p-1 text-right pr-2">{totalBeforeService.toLocaleString()}</td>
+            <td className="border-r-2 border-black p-1 text-right pr-2">{Math.floor(totalBeforeService).toLocaleString()}</td>
             <td className="p-1 text-center">{(Math.round((totalBeforeService % 1) * 100)).toString().padStart(2, '0')}</td>
           </tr>
           <tr className="h-7 text-[11px] border-b-2 border-black">
             <td className="border-r-2 border-black p-1 pl-4 uppercase" colSpan={6}>Service Charge {serviceRate}%</td>
-            <td className="border-r-2 border-black p-1 text-right pr-2">{service.toLocaleString()}</td>
+            <td className="border-r-2 border-black p-1 text-right pr-2">{Math.floor(service).toLocaleString()}</td>
             <td className="p-1 text-center">{(Math.round((service % 1) * 100)).toString().padStart(2, '0')}</td>
           </tr>
           <tr className="font-bold h-7 bg-slate-100/50 border-b-2 border-black text-[11px]">
-            <td className="border-r-2 border-black p-1 text-right pr-4 uppercase" colSpan={6}>Total (Taxable Value)</td>
-            <td className="border-r-2 border-black p-1 text-right pr-2">{(totalBeforeService + service).toLocaleString()}</td>
+            <td className="border-r-2 border-black p-1 text-right pr-4 uppercase" colSpan={6}>Total {isGST && "(Taxable Value)"}</td>
+            <td className="border-r-2 border-black p-1 text-right pr-2">{Math.floor(totalBeforeService + service).toLocaleString()}</td>
             <td className="p-1 text-center">{(Math.round(((totalBeforeService + service) % 1) * 100)).toString().padStart(2, '0')}</td>
           </tr>
-          <tr className="h-7 border-b-2 border-black text-[11px]">
-            <td className="border-r-2 border-black p-1 pl-4 uppercase" colSpan={6}>CGST {cgstRate}%</td>
-            <td className="border-r-2 border-black p-1 text-right pr-2">{cgst.toLocaleString()}</td>
-            <td className="p-1 text-center">{(Math.round((cgst % 1) * 100)).toString().padStart(2, '0')}</td>
-          </tr>
-          <tr className="h-7 border-b-2 border-black text-[11px]">
-            <td className="border-r-2 border-black p-1 pl-4 uppercase" colSpan={6}>SGST {sgstRate}%</td>
-            <td className="border-r-2 border-black p-1 text-right pr-2">{sgst.toLocaleString()}</td>
-            <td className="p-1 text-center">{(Math.round((sgst % 1) * 100)).toString().padStart(2, '0')}</td>
-          </tr>
+          {isGST && (
+            <>
+              <tr className="h-7 border-b-2 border-black text-[11px]">
+                <td className="border-r-2 border-black p-1 pl-4 uppercase" colSpan={6}>CGST {cgstRate}%</td>
+                <td className="border-r-2 border-black p-1 text-right pr-2">{Math.floor(cgst).toLocaleString()}</td>
+                <td className="p-1 text-center">{(Math.round((cgst % 1) * 100)).toString().padStart(2, '0')}</td>
+              </tr>
+              <tr className="h-7 border-b-2 border-black text-[11px]">
+                <td className="border-r-2 border-black p-1 pl-4 uppercase" colSpan={6}>SGST {sgstRate}%</td>
+                <td className="border-r-2 border-black p-1 text-right pr-2">{Math.floor(sgst).toLocaleString()}</td>
+                <td className="p-1 text-center">{(Math.round((sgst % 1) * 100)).toString().padStart(2, '0')}</td>
+              </tr>
+            </>
+          )}
           {props.roundOff !== 0 && (
             <tr className="h-7 border-b-2 border-black text-[11px] italic">
               <td className="border-r-2 border-black p-1 pl-4 uppercase" colSpan={6}>Round Off</td>
@@ -204,7 +210,7 @@ export const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>((p
             <td className="border-r-2 border-black p-1 text-right pr-4 uppercase" colSpan={4}>Grand Total</td>
             <td className="border-r-2 border-black p-1 text-center">{lineItems.reduce((sum, i) => sum + i.posts, 0).toString().padStart(2, '0')}</td>
             <td className="border-r-2 border-black p-1"></td>
-            <td className="border-r-2 border-black p-1 text-right pr-2 text-base">{grand.toLocaleString()}</td>
+            <td className="border-r-2 border-black p-1 text-right pr-2 text-base">{Math.floor(grand).toLocaleString()}</td>
             <td className="p-1 text-center text-base">{(Math.round((grand % 1) * 100)).toString().padStart(2, '0')}</td>
           </tr>
         </tbody>

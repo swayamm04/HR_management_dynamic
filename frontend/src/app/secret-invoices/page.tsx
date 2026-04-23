@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { FileText, Loader2, Calendar, User, IndianRupee, Search, MoreVertical, Eye, Download, Trash2 } from "lucide-react";
+import { FileText, Loader2, Calendar, User, Search, Download, ShieldCheck } from "lucide-react";
 import { useState } from "react";
 import { format } from "date-fns";
 import { useRef } from "react";
@@ -9,21 +9,21 @@ import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import { InvoicePreview } from "@/components/billing/InvoicePreview";
 
-async function fetchInvoices() {
+async function fetchSecretInvoices() {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
-  const response = await fetch(`${apiUrl}/api/invoices?isGST=true`);
-  if (!response.ok) throw new Error("Failed to fetch invoices");
+  const response = await fetch(`${apiUrl}/api/invoices?isGST=false`);
+  if (!response.ok) throw new Error("Failed to fetch secret invoices");
   return response.json();
 }
 
-export default function InvoiceHistoryPage() {
+export default function SecretInvoicesPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
   const previewRef = useRef<HTMLDivElement>(null);
   
   const { data: invoices, isLoading, error } = useQuery({
-    queryKey: ["invoices"],
-    queryFn: fetchInvoices,
+    queryKey: ["secret-invoices"],
+    queryFn: fetchSecretInvoices,
   });
 
   const filteredInvoices = invoices?.filter((inv: any) => 
@@ -41,7 +41,6 @@ export default function InvoiceHistoryPage() {
 
   const handleDownloadPDF = async (inv: any) => {
     setDownloadingId(inv._id);
-    // Allow a small delay for the hidden preview to render with the correct data
     setTimeout(async () => {
       if (!previewRef.current) {
         setDownloadingId(null);
@@ -62,7 +61,7 @@ export default function InvoiceHistoryPage() {
         const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
         
         pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-        pdf.save(`${inv.invoiceNumber}.pdf`);
+        pdf.save(`${inv.invoiceNumber}_NON_GST.pdf`);
       } catch (error) {
         console.error("PDF Generation Error:", error);
       } finally {
@@ -74,13 +73,31 @@ export default function InvoiceHistoryPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-2 text-sm text-muted-foreground">
-        <span>Dashboard</span> <span>›</span> <span className="text-foreground font-medium">Invoice History</span>
+        <span>Dashboard</span> <span>›</span> <span className="text-foreground font-medium">Secret Management</span>
       </div>
 
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Invoices List</h1>
-          <p className="text-sm text-muted-foreground">Manage and track all generated billing records.</p>
+          <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
+            Non-GST Billing Records
+            <ShieldCheck className="h-5 w-5 text-primary" />
+          </h1>
+          <p className="text-sm text-muted-foreground">Confidential records for non-taxable invoices.</p>
+        </div>
+      </div>
+
+      {/* Summary Card */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+          <div className="flex items-center gap-4">
+            <div className="p-3 rounded-lg bg-primary/10 text-primary">
+              <FileText className="h-6 w-6" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-muted-foreground">Total Secret Bills</p>
+              <h3 className="text-2xl font-bold text-foreground">{invoices?.length || 0}</h3>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -104,7 +121,7 @@ export default function InvoiceHistoryPage() {
           </div>
         ) : error ? (
           <div className="flex h-64 items-center justify-center text-destructive">
-            Failed to load invoices.
+            Failed to load secret invoices.
           </div>
         ) : filteredInvoices.length > 0 ? (
           <div className="overflow-x-auto">
@@ -183,9 +200,9 @@ export default function InvoiceHistoryPage() {
             <div className="h-16 w-16 rounded-full bg-muted flex items-center justify-center mb-4">
               <FileText className="h-8 w-8 text-muted-foreground" />
             </div>
-            <h3 className="text-lg font-bold text-foreground">No invoices generated yet</h3>
+            <h3 className="text-lg font-bold text-foreground">No non-GST invoices found</h3>
             <p className="text-sm text-muted-foreground mt-1 max-w-xs">
-              Go to the creation page to generate your first professional billing record.
+              Any invoices generated with GST off will appear here.
             </p>
           </div>
         )}
@@ -208,10 +225,16 @@ export default function InvoiceHistoryPage() {
               subTotal={inv.subTotal}
               pf={inv.pf}
               esi={inv.esi}
-              totalBeforeService={inv.taxableValue}
+              totalBeforeService={inv.taxableValue - inv.serviceCharge} // Reconstructing taxable value
               service={inv.serviceCharge}
               grand={inv.grandTotal}
               date={format(new Date(inv.createdAt), "dd.MM.yyyy")}
+              isGST={false}
+              pfRate={13} // Defaults or fetch from settings if needed
+              esiRate={3.25}
+              serviceRate={3}
+              cgstRate={9}
+              sgstRate={9}
             />
           );
         })()}

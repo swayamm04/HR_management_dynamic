@@ -1,10 +1,7 @@
 import type { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
-import Employee from '../models/Employee.js';
-
-const ADMIN_EMAIL = 'admin@hrmanagement.com';
-const ADMIN_PASSWORD = '123456';
+import User from '../models/User.js';
 
 export const login = async (req: Request, res: Response) => {
     try {
@@ -14,27 +11,35 @@ export const login = async (req: Request, res: Response) => {
             return res.status(400).json({ message: 'Email and password are required' });
         }
 
-        // 1. Check for Admin
-        if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
-            const token = jwt.sign(
-                { email: ADMIN_EMAIL, role: 'Administrator' },
-                process.env.JWT_SECRET as string,
-                { expiresIn: '1d' }
-            );
-
-            return res.status(200).json({
-                message: 'Login successful',
-                token,
-                user: {
-                    email: ADMIN_EMAIL,
-                    name: 'Admin User',
-                    role: 'Administrator'
-                }
-            });
+        // 1. Find User
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(401).json({ message: 'incorrect mail or password' });
         }
 
-        // 2. Employee login removed (Employee management minimized)
-        return res.status(401).json({ message: 'incorrect mail or password' });
+        // 2. Check Password
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+            return res.status(401).json({ message: 'incorrect mail or password' });
+        }
+
+        // 3. Generate Token
+        const token = jwt.sign(
+            { id: user._id, email: user.email, role: user.role },
+            process.env.JWT_SECRET as string,
+            { expiresIn: '1d' }
+        );
+
+        return res.status(200).json({
+            message: 'Login successful',
+            token,
+            user: {
+                id: user._id,
+                email: user.email,
+                name: user.name,
+                role: user.role
+            }
+        });
 
     } catch (error) {
         console.error('Login error:', error);

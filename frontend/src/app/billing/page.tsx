@@ -64,6 +64,7 @@ export default function BillingInvoices() {
   const [billingMonth, setBillingMonth] = useState<string>("");
   const [viewYear, setViewYear] = useState<number>(new Date().getFullYear());
   const [isMonthPickerOpen, setIsMonthPickerOpen] = useState(false);
+  const [isGST, setIsGST] = useState(true);
 
   const [lineItems, setLineItems] = useState<LineItem[]>([]);
   const [clientAddress, setClientAddress] = useState<string>("");
@@ -75,6 +76,7 @@ export default function BillingInvoices() {
     setLineItems([]);
     setOpenRole(null);
     setOpenClient(false);
+    setIsGST(true);
   };
 
   const { data: clients, isLoading: clientsLoading } = useQuery({
@@ -171,14 +173,14 @@ export default function BillingInvoices() {
     const totalBeforeService = Number((subTotal + pf + esi).toFixed(2));
     const service = Number((totalBeforeService * rates.service).toFixed(2));
     const taxableValue = Number((totalBeforeService + service).toFixed(2));
-    const cgst = Number((taxableValue * rates.cgst).toFixed(2));
-    const sgst = Number((taxableValue * rates.sgst).toFixed(2));
+    const cgst = isGST ? Number((taxableValue * rates.cgst).toFixed(2)) : 0;
+    const sgst = isGST ? Number((taxableValue * rates.sgst).toFixed(2)) : 0;
     const finalBeforeRound = taxableValue + cgst + sgst;
-    const grand = Math.round(finalBeforeRound);
+    const grand = Math.ceil(finalBeforeRound);
     const roundOff = Number((grand - finalBeforeRound).toFixed(2));
 
     return { subTotal, pf, esi, totalBeforeService, service, taxableValue, cgst, sgst, grand, roundOff, rates };
-  }, [lineItems, companyDetails]);
+  }, [lineItems, companyDetails, isGST]);
 
   const { subTotal, pf, esi, totalBeforeService, service, taxableValue, cgst, sgst, grand, roundOff, rates } = calculations;
   const displayRates = {
@@ -229,6 +231,7 @@ export default function BillingInvoices() {
       taxableValue,
       cgst,
       sgst,
+      isGST,
       roundOff,
       grandTotal: grand,
       grandTotalInWords: numberToIndianWords(grand), 
@@ -639,17 +642,28 @@ export default function BillingInvoices() {
               </div>
 
               <div className="flex justify-between items-center text-xs pt-1">
-                <span className="text-primary font-bold uppercase tracking-wider">Total (Taxable Value)</span>
+                <span 
+                  className="text-primary font-bold uppercase tracking-wider cursor-pointer select-none"
+                  onDoubleClick={() => {
+                    setIsGST(!isGST);
+                  }}
+                >
+                  Total {isGST && "(Taxable Value)"}
+                </span>
                 <span className="font-bold text-primary">{formatCurrency(taxableValue)}</span>
               </div>
-              <div className="flex justify-between text-muted-foreground text-xs">
-                <span>CGST ({displayRates.cgst}%)</span>
-                <span>{formatCurrency(cgst)}</span>
-              </div>
-              <div className="flex justify-between text-muted-foreground text-xs">
-                <span>SGST ({displayRates.sgst}%)</span>
-                <span>{formatCurrency(sgst)}</span>
-              </div>
+              {isGST && (
+                <>
+                  <div className="flex justify-between text-muted-foreground text-xs">
+                    <span>CGST ({displayRates.cgst}%)</span>
+                    <span>{formatCurrency(cgst)}</span>
+                  </div>
+                  <div className="flex justify-between text-muted-foreground text-xs">
+                    <span>SGST ({displayRates.sgst}%)</span>
+                    <span>{formatCurrency(sgst)}</span>
+                  </div>
+                </>
+              )}
               <div className="flex justify-between text-muted-foreground text-xs italic">
                 <span>Round Off</span>
                 <span>{roundOff > 0 ? "+" : ""}{roundOff.toFixed(2)}</span>
@@ -719,6 +733,7 @@ export default function BillingInvoices() {
           serviceRate={displayRates.service}
           cgstRate={displayRates.cgst}
           sgstRate={displayRates.sgst}
+          isGST={isGST}
         />
       </div>
     </div>

@@ -4,7 +4,14 @@ import Invoice from '../models/Invoice.js';
 // Get all invoices (Reverse Chronological Order)
 export const getInvoices = async (req: Request, res: Response) => {
   try {
-    const invoices = await Invoice.find().sort({ createdAt: -1 });
+    const { isGST } = req.query;
+    const filter: any = {};
+    
+    if (isGST !== undefined) {
+      filter.isGST = isGST === 'true';
+    }
+    
+    const invoices = await Invoice.find(filter).sort({ createdAt: -1 });
     res.status(200).json(invoices);
   } catch (error: any) {
     res.status(500).json({ message: error.message });

@@ -22,6 +22,7 @@ export interface IInvoice extends Document {
   sgst: number;
   grandTotal: number;
   grandTotalInWords: string;
+  isGST: boolean;
   createdAt: Date;
 }
 
@@ -61,6 +62,7 @@ const invoiceSchema = new Schema(
     sgst: { type: Number, required: true },
     grandTotal: { type: Number, required: true },
     grandTotalInWords: { type: String, required: false },
+    isGST: { type: Boolean, default: true },
   },
   {
     timestamps: true,

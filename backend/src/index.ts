@@ -9,6 +9,7 @@ import jobRoleRoutes from './routes/jobRoleRoutes.js';
 import clientRoutes from './routes/clientRoutes.js';
 import invoiceRoutes from './routes/invoiceRoutes.js';
 import companyRoutes from './routes/companyRoutes.js';
+import userRoutes from './routes/userRoutes.js';
 
 // Load env vars
 dotenv.config();
@@ -44,6 +45,7 @@ app.use('/api/job-roles', jobRoleRoutes);
 app.use('/api/clients', clientRoutes);
 app.use('/api/invoices', invoiceRoutes);
 app.use('/api/company', companyRoutes);
+app.use('/api/users', userRoutes);
 
 // Basic route
 app.get('/', (req: Request, res: Response) => {

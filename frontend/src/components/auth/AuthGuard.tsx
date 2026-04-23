@@ -6,7 +6,7 @@ import { useEffect } from "react";
 import AppLayout from "@/components/layout/AppLayout";
 
 export default function AuthGuard({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, loading, user } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
 
@@ -14,7 +14,15 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
     if (!loading && !isAuthenticated && pathname !== "/login") {
       router.push("/login");
     }
-  }, [isAuthenticated, loading, pathname, router]);
+
+    // Role-based protection
+    if (!loading && isAuthenticated && user) {
+      const adminOnlyRoutes = ["/activity-logs", "/settings/users"];
+      if (user.role !== "Administrator" && adminOnlyRoutes.includes(pathname)) {
+        router.push("/");
+      }
+    }
+  }, [isAuthenticated, loading, pathname, router, user]);
 
   // Show nothing while loading the auth state
   if (loading) {
