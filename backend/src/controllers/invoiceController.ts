@@ -25,7 +25,7 @@ export const createInvoice = async (req: Request, res: Response) => {
     
     // Simple invoice number generation: INV-YYYY-MM-MS
     const now = new Date();
-    const dateStr = now.toISOString().split('T')[0].replace(/-/g, '');
+    const dateStr = now.toISOString().slice(0, 10).replace(/-/g, '');
     const count = await Invoice.countDocuments();
     const invoiceNumber = `INV-${dateStr}-${(count + 1).toString().padStart(3, '0')}`;
     

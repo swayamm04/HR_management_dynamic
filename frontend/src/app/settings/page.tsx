@@ -19,6 +19,11 @@ interface CompanyDetails {
   mobile: string;
   address: string;
   bankRecipientId: string;
+  pfRate: number;
+  esiRate: number;
+  serviceRate: number;
+  cgstRate: number;
+  sgstRate: number;
 }
 
 async function fetchCompanyDetails(): Promise<CompanyDetails> {

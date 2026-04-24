@@ -210,6 +210,8 @@ export default function InvoiceHistoryPage() {
               esi={inv.esi}
               totalBeforeService={inv.taxableValue}
               service={inv.serviceCharge}
+              cgst={inv.cgst}
+              sgst={inv.sgst}
               grand={inv.grandTotal}
               date={format(new Date(inv.createdAt), "dd.MM.yyyy")}
             />

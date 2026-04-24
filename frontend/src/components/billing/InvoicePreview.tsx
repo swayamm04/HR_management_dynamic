@@ -24,6 +24,10 @@ interface CompanyDetails {
   ifscCode: string;
   branch: string;
   swiftCode: string;
+  bankRecipientId: string;
+  pan: string;
+  pfCode: string;
+  esicCode: string;
 }
 
 interface InvoicePreviewProps {
@@ -37,14 +41,14 @@ interface InvoicePreviewProps {
   esi: number;
   totalBeforeService: number;
   service: number;
-  cgst: number;
-  sgst: number;
+  cgst?: number;
+  sgst?: number;
   grand: number;
-  pfRate: number;
-  esiRate: number;
-  serviceRate: number;
-  cgstRate: number;
-  sgstRate: number;
+  pfRate?: number;
+  esiRate?: number;
+  serviceRate?: number;
+  cgstRate?: number;
+  sgstRate?: number;
   roundOff?: number;
   date?: string;
   isGST?: boolean;
@@ -62,14 +66,14 @@ export const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>((p
     esi, 
     totalBeforeService, 
     service, 
-    cgst,
-    sgst,
+    cgst = 0,
+    sgst = 0,
     grand,
-    pfRate,
-    esiRate,
-    serviceRate,
-    cgstRate,
-    sgstRate,
+    pfRate = 13,
+    esiRate = 3.25,
+    serviceRate = 3,
+    cgstRate = 9,
+    sgstRate = 9,
     date,
     isGST = true
   } = props;
